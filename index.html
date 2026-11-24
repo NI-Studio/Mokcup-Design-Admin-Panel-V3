@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — eStamp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      --blue: #2563EB;
+      --blue-hover: #1D4ED8;
+      --blue-tint: #EFF6FF;
+      --blue-br: #BFDBFE;
+
+      --bg: #F6F8FB;
+      --surface: #FFFFFF;
+      --subtle: #F8FAFC;
+      --ink: #0F172A;
+      --ink-2: #475569;
+      --ink-3: #94A3B8;
+      --border: #E2E8F0;
+      --border-soft: #F1F5F9;
+
+      --green: #15803D;
+      --green-bg: #F0FDF4;
+      --green-br: #BBF7D0;
+
+      --amber: #B45309;
+      --amber-bg: #FFFBEB;
+      --amber-br: #FDE68A;
+
+      --red: #DC2626;
+      --red-bg: #FEF2F2;
+      --red-br: #FECACA;
+
+      --rad-lg: 12px;
+      --rad-md: 8px;
+      --rad-sm: 6px;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button, input, select {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "zero" 0;
+    }
+
+    /* ── Dual-Rail Fixed Left Sidebar (matches reference image) ── */
+    .rail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 56px;
+      background: var(--subtle);
+      border-right: 1px solid var(--border);
+      z-index: 55;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+
+    .rail-top, .rail-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rail-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--rad-md);
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 6px;
+    }
+
+    .rail-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--rad-md);
+      color: var(--ink-2);
+      display: grid;
+      place-items: center;
+      transition: background 140ms var(--ease), color 140ms var(--ease);
+    }
+
+    .rail-btn:hover, .rail-btn.active {
+      background: #fff;
+      color: var(--blue);
+      box-shadow: var(--shadow);
+    }
+
+    .rail-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      color: #64748B;
+      display: grid;
+      place-items: center;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 56px;
+      bottom: 0;
+      width: 232px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      z-index: 50;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* Search inside Sidebar (with ⌘K + Global Dropdown) */
+    .side-search-wrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .side-search {
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      background: var(--subtle);
+      padding: 0 8px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .side-search:focus-within {
+      background: #fff;
+      border-color: var(--blue);
+    }
+
+    .side-search input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13px;
+    }
+
+    .kbd-chip {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--ink-3);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    .global-search-dropdown {
+      position: fixed;
+      top: 56px;
+      left: 68px;
+      width: 420px;
+      max-width: calc(100vw - 88px);
+      z-index: 80;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-lg);
+      box-shadow: 0 20px 44px -10px rgba(15, 23, 42, 0.22);
+      max-height: 420px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .global-search-dropdown.open { display: block; }
+
+    .search-group-title {
+      padding: 7px 12px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-3);
+      background: var(--subtle);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .search-result-item {
+      width: 100%;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: var(--blue-tint); }
+
+    .side-nav {
+      display: grid;
+      gap: 2px;
+    }
+
+    .side-link {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--rad-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-2);
+      text-align: left;
+      transition: background 120ms var(--ease), color 120ms var(--ease);
+    }
+
+    .side-link:hover {
+      background: var(--subtle);
+      color: var(--ink);
+    }
+
+    .side-link.active {
+      background: var(--blue-tint);
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .side-link-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .side-link svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .side-count {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 99px;
+      background: var(--border-soft);
+      color: var(--ink-2);
+    }
+
+    .side-link.active .side-count {
+      background: #fff;
+      color: var(--blue);
+    }
+
+    .side-section-head {
+      margin: 16px 6px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .col-item {
+      width: 100%;
+      padding: 7px 8px;
+      border-radius: var(--rad-sm);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--ink-2);
+      text-align: left;
+    }
+
+    .col-item:hover { background: var(--subtle); color: var(--ink); }
+
+    .col-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .col-badge.blue { background: var(--blue-tint); color: var(--blue); }
+    .col-badge.amber { background: var(--amber-bg); color: var(--amber); }
+    .col-badge.green { background: var(--green-bg); color: var(--green); }
+
+    .side-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .portal-box {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      background: var(--subtle);
+    }
+
+    .portal-box-title { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+    .portal-box-sub { font-size: 11.5px; color: var(--ink-2); margin-bottom: 8px; }
+    .portal-bar { height: 4px; border-radius: 99px; background: var(--border); overflow: hidden; }
+    .portal-bar-fill { width: 72%; height: 100%; background: var(--blue); }
+
+    .side-logout {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: var(--rad-sm);
+      color: var(--red);
+      font-size: 12.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .side-logout:hover { background: var(--red-bg); }
+
+    /* ── Fixed Top Bar (starts at left: 288px) ── */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 288px;
+      right: 0;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      z-index: 40;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .top-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-top-btn {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      background: #fff;
+      color: var(--ink-2);
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-top-btn:hover { background: var(--subtle); color: var(--ink); }
+
+    .notif-pill {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 99px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+      height: 34px;
+      padding: 0 13px;
+      border-radius: var(--rad-md);
+      font-size: 12.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: background 120ms var(--ease), border-color 120ms var(--ease);
+    }
+
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-blue:hover { background: var(--blue-hover); }
+
+    .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--ink); }
+    .btn-outline:hover { background: var(--subtle); }
+
+    .btn-amber { background: var(--amber-bg); border: 1px solid var(--amber-br); color: var(--amber); }
+    .btn-amber:hover { background: #FEF3C7; }
+
+    .btn-red { background: var(--red-bg); border: 1px solid var(--red-br); color: var(--red); }
+    .btn-red:hover { background: #FEE2E2; }
+
+    .btn-green { background: var(--green-bg); border: 1px solid var(--green-br); color: var(--green); }
+    .btn-green:hover { background: #D1FAE5; }
+
+    /* ── Main Content ── */
+    .main {
+      margin-left: 288px;
+      padding: 76px 24px 48px;
+      min-height: 100vh;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Bento Top 3 Cards (matches reference top row) */
+    .bento-top {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--rad-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-pad { padding: 18px 20px; }
+
+    .card-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+    .card-sub { font-size: 12px; color: var(--ink-2); }
+
+    .insight-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--blue);
+      margin-bottom: 14px;
+    }
+
+    .big-kpi {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .meter-track {
+      height: 10px;
+      border-radius: 99px;
+      background: var(--border-soft);
+      overflow: hidden;
+      margin: 14px 0 6px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #60A5FA 0%, #2563EB 100%);
+    }
+
+    /* Bar Chart (matches Profiles added card) */
+    .bars-wrap {
+      height: 92px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .bar-col {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      background: #E2E8F0;
+      min-height: 12px;
+      transition: background 150ms var(--ease);
+    }
+
+    .bar-col.peak { background: var(--blue); }
+
+    /* Highlighted Users Mini List */
+    .mini-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .mini-user-row:last-child { border-bottom: none; }
+
+    .mini-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      color: #64748B;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    /* Custom Dropdown */
+    .custom-select { position: relative; min-width: 170px; }
+
+    .custom-select-trigger {
+      width: 100%;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      background: #fff;
+      font-size: 12.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 60;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+      padding: 4px;
+      display: none;
+    }
+
+    .custom-select.open .custom-select-menu { display: grid; gap: 2px; }
+
+    .custom-select-opt {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: var(--rad-sm);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--ink-2);
+      text-align: left;
+    }
+
+    .custom-select-opt:hover { background: var(--subtle); color: var(--ink); }
+    .custom-select-opt.selected { background: var(--blue-tint); color: var(--blue); font-weight: 600; }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--subtle);
+      text-align: left;
+      padding: 11px 16px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink-2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-soft);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #FAFCFF; }
+
+    .nowrap { white-space: nowrap; }
+
+    .action-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .rule-note { font-size: 11.5px; color: var(--ink-2); margin-top: 1px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 23px;
+      padding: 0 9px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge.green { background: var(--green-bg); color: var(--green); border-color: var(--green-br); }
+    .badge.blue { background: var(--blue-tint); color: var(--blue); border-color: var(--blue-br); }
+    .badge.amber { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-br); }
+    .badge.red { background: var(--red-bg); color: var(--red); border-color: var(--red-br); }
+    .badge.grey { background: var(--subtle); color: var(--ink-2); border-color: var(--border); }
+
+    /* Pagination */
+    .pagination-bar {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--ink-2);
+      background: #fff;
+      flex-wrap: wrap;
+    }
+
+    .page-btns { display: inline-flex; align-items: center; gap: 5px; }
+
+    .page-btn {
+      min-width: 30px;
+      height: 28px;
+      padding: 0 9px;
+      border-radius: var(--rad-sm);
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover:not(:disabled) { background: var(--subtle); }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Bottom Bento Row (Document Breakdown + Activity Log) */
+    .bento-bottom {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 16px;
+      margin-top: 16px;
+      align-items: stretch;
+    }
+
+    .bento-bottom > .card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .skill-bar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .skill-bar-row:last-child { margin-bottom: 0; }
+
+    .skill-pill {
+      position: relative;
+      flex: 1;
+      height: 30px;
+      border-radius: var(--rad-sm);
+      background: var(--subtle);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+
+    .skill-pill-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: var(--blue-tint);
+      z-index: 0;
+    }
+
+    .skill-pill span { position: relative; z-index: 1; }
+
+    .log-row {
+      padding: 11px 18px;
+      border-bottom: 1px solid var(--border-soft);
+      border-left: 3px solid var(--blue);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .log-row.red { border-left-color: var(--red); }
+    .log-row.green { border-left-color: var(--green); }
+    .log-row.amber { border-left-color: #D97706; }
+
+    .log-top { display: flex; justify-content: space-between; gap: 10px; }
+    .log-title { font-size: 13px; font-weight: 600; }
+    .log-time { font-size: 11.5px; color: var(--ink-3); }
+    .log-desc { font-size: 12px; color: var(--ink-2); }
+
+    /* Modal (Order Details with 6-step tracker) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(15, 23, 42, 0.48);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 740px;
+      background: #fff;
+      border-radius: var(--rad-lg);
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 18px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--subtle);
+    }
+
+    .mtab {
+      padding: 10px 2px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-2);
+      border-bottom: 2px solid transparent;
+    }
+
+    .mtab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    .modal-body { padding: 18px 20px; display: grid; gap: 14px; }
+    .modal-foot {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tracker-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      font-size: 12.5px;
+    }
+
+    .steps-track {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0;
+      position: relative;
+      margin: 6px 0;
+    }
+
+    .step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 4px;
+      position: relative;
+    }
+
+    .step-node::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: calc(-50% + 16px);
+      right: calc(50% + 16px);
+      height: 2.5px;
+      background: var(--border);
+      z-index: 0;
+    }
+
+    .step-node:first-child::before { display: none; }
+    .step-node.done::before, .step-node.current::before { background: var(--blue); }
+
+    .step-num {
+      position: relative;
+      z-index: 2;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--border);
+      color: var(--ink-3);
+      font-size: 12px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      margin-bottom: 6px;
+    }
+
+    .step-node.done .step-num { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .step-node.current .step-num { background: var(--blue-tint); border-color: var(--blue); color: var(--blue); }
+    .step-label { font-size: 11.5px; font-weight: 600; color: var(--ink-2); }
+    .step-node.done .step-label, .step-node.current .step-label { color: var(--ink); }
+    .step-time { font-size: 11px; color: var(--ink-3); }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+    .input {
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--rad-md);
+      padding: 0 12px;
+      background: #fff;
+      outline: none;
+    }
+    .input:focus { border-color: var(--blue); }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 90;
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: var(--rad-md);
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.22);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1100px) {
+      .rail, .sidebar { display: none; }
+      .topbar { left: 0; }
+      .main { margin-left: 0; padding: 74px 16px 40px; }
+      .bento-top, .bento-bottom { grid-template-columns: 1fr; }
+      .steps-track { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .step-node::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <input type="file" id="certUploadInput" accept=".pdf" style="display:none" />
+
+  <!-- Far-Left Icon Rail -->
+  <aside class="rail">
+    <div class="rail-top">
+      <div class="rail-logo" title="eStamp Admin">e</div>
+      <button class="rail-btn active" onclick="switchView('dashboard', 'Dashboard')" title="Dashboard">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="rail-btn" onclick="switchView('orders', 'All Stamping Orders')" title="Orders">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </button>
+      <button class="rail-btn" onclick="window.open('index.html', '_blank')" title="Customer Portal">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </button>
+    </div>
+    <div class="rail-bottom">
+      <button class="rail-btn" onclick="switchView('settings', 'Settings & Roles')" title="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="rail-avatar" title="Ruzaini · Super Admin">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v2h20v-2c0-3.33-6.67-5-10-5z"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Secondary Fixed Navigation Sidebar -->
+  <aside class="sidebar">
+    <div class="side-search-wrap" id="globalSearchWrap">
+      <div class="side-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search..." autocomplete="off" />
+        <span class="kbd-chip">⌘K</span>
+      </div>
+      <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+    </div>
+
+    <nav class="side-nav" aria-label="Admin Navigation">
+      <button class="side-link active" data-view="dashboard" data-title="Dashboard">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Dashboard
+        </span>
+      </button>
+
+      <button class="side-link" data-view="orders" data-title="All Stamping Orders">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Orders
+        </span>
+        <span class="side-count num" id="navOrderCount">5</span>
+      </button>
+
+      <button class="side-link" data-view="unpaid" data-title="Incomplete Payments">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Incomplete Payments
+        </span>
+        <span class="side-count num" id="navUnpaidCount">2</span>
+      </button>
+
+      <button class="side-link" data-view="users" data-title="Active Users">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Active Users
+        </span>
+        <span class="side-count num" id="navUserCount">4</span>
+      </button>
+
+      <button class="side-link" data-view="rates" data-title="Duty & Doc Rates">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Duty &amp; Doc Rates
+        </span>
+      </button>
+
+      <button class="side-link" data-view="invoices" data-title="e-Invoices & Receipts">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/></svg>
+          e-Invoices &amp; Receipts
+        </span>
+      </button>
+
+      <button class="side-link" data-view="logs" data-title="Activity Log">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Activity Log
+        </span>
+        <span class="side-count num" id="navLogCount">5</span>
+      </button>
+
+      <button class="side-link" data-view="settings" data-title="Settings & Roles">
+        <span class="side-link-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings &amp; Roles
+        </span>
+      </button>
+    </nav>
+
+    <div class="side-section-head">
+      <span>Quick Views</span>
+    </div>
+    <div>
+      <button class="col-item" onclick="switchView('unpaid', 'Incomplete Payments')">
+        <span class="col-badge amber">1st</span> 1st-Time Auto-Cancel
+      </button>
+      <button class="col-item" onclick="switchView('orders', 'All Stamping Orders')">
+        <span class="col-badge blue">2nd</span> Repeat Account Queue
+      </button>
+      <button class="col-item" onclick="window.open('index.html', '_blank')">
+        <span class="col-badge green">UI</span> Customer Portal
+      </button>
+    </div>
+
+    <div class="side-footer">
+      <div class="portal-box">
+        <div class="portal-box-title">Distro Empire Admin</div>
+        <div class="portal-box-sub">LHDN Manual Queue Active</div>
+        <div class="portal-bar"><div class="portal-bar-fill"></div></div>
+      </div>
+      <button class="side-logout" onclick="showToast('Admin session ended.')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Fixed White Top Bar -->
+  <header class="topbar">
+    <div class="top-title" id="topPageTitle">Dashboard</div>
+    <div class="top-right">
+      <button class="icon-top-btn" onclick="switchView('orders', 'All Stamping Orders')" aria-label="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-pill num" id="notifCount">2</span>
+      </button>
+      <button class="btn btn-outline" onclick="runAutoCancelRule()">Run Auto-Cancel</button>
+      <button class="btn btn-blue" onclick="openSimulateModal()">+ Simulate Order</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- 1. DASHBOARD VIEW -->
+    <section class="view active" id="view-dashboard">
+      <!-- Top 3-Col Bento Row (matches reference) -->
+      <div class="bento-top">
+        <div class="card card-pad">
+          <div class="insight-tag">Revenue &amp; Collection</div>
+          <div class="big-kpi num" id="kpiRev">RM 140.00</div>
+          <div style="font-size:13px; color:var(--ink-2);">
+            <strong class="num" id="kpiUnpaid">2</strong> incomplete payments · <strong class="num" id="kpiNew">2</strong> new orders
+          </div>
+          <div class="meter-track"><div class="meter-fill" style="width:70%;"></div></div>
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-3);">
+            <span>Paid</span>
+            <span>Pending</span>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; font-weight:600;">Orders Added</span>
+            <span style="font-size:12px; color:var(--ink-3);">This month</span>
+          </div>
+          <div class="big-kpi num" style="margin-top:4px;" id="kpiTotalOrders">5</div>
+          <div class="bars-wrap">
+            <div class="bar-col" style="height:28%;"></div>
+            <div class="bar-col" style="height:44%;"></div>
+            <div class="bar-col peak" style="height:88%;"></div>
+            <div class="bar-col" style="height:56%;"></div>
+            <div class="bar-col" style="height:36%;"></div>
+            <div class="bar-col" style="height:74%;"></div>
+            <div class="bar-col" style="height:62%;"></div>
+            <div class="bar-col" style="height:48%;"></div>
+            <div class="bar-col" style="height:70%;"></div>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600;">Active Users</div>
+              <div style="font-size:11.5px; color:var(--ink-3);">Auto-created on 1st payment</div>
+            </div>
+            <button class="btn btn-outline" style="height:28px; padding:0 9px; font-size:11.5px;" onclick="switchView('users', 'Active Users')">See All</button>
+          </div>
+          <div id="dashUsersList"></div>
+        </div>
+      </div>
+
+      <!-- Main Incoming Orders Table (Latest 4 + See All) -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Incoming Orders &amp; Payment Queue (Latest 4)</div>
+            <div class="card-sub">1st-time unpaid orders auto-cancel; 2nd-time orders in same account stay open</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="custom-select" id="dashStatusDropdown">
+              <button type="button" class="custom-select-trigger" id="dashStatusTrigger">
+                <span id="dashStatusLabel">All statuses</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="custom-select-menu" id="dashStatusMenu">
+                <button type="button" class="custom-select-opt selected" data-value="all">All statuses</button>
+                <button type="button" class="custom-select-opt" data-value="New">New</button>
+                <button type="button" class="custom-select-opt" data-value="Awaiting Payment">Awaiting Payment</button>
+                <button type="button" class="custom-select-opt" data-value="Incomplete Document">Incomplete Document</button>
+                <button type="button" class="custom-select-opt" data-value="Sent to LHDN">Sent to LHDN</button>
+                <button type="button" class="custom-select-opt" data-value="Completed">Completed</button>
+                <button type="button" class="custom-select-opt" data-value="Auto-Cancelled">Auto-Cancelled</button>
+              </div>
+            </div>
+            <button class="btn btn-outline" onclick="switchView('orders', 'All Stamping Orders')">See All</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Document</th>
+                <th>Amount</th>
+                <th>Account &amp; Payment Rule</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dashOrdersBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bottom 2-Col Bento (Document Breakdown + Activity Log) -->
+      <div class="bento-bottom">
+        <div class="card card-pad">
+          <div style="font-size:14px; font-weight:600; margin-bottom:14px;">Document Types</div>
+          <div class="skill-bar-row">
+            <div class="skill-pill"><div class="skill-pill-fill" style="width:76%;"></div><span>Tenancy Agreement</span></div>
+            <span class="num" style="font-size:12.5px; font-weight:600;">42%</span>
+          </div>
+          <div class="skill-bar-row">
+            <div class="skill-pill"><div class="skill-pill-fill" style="width:52%;"></div><span>Service Agreement</span></div>
+            <span class="num" style="font-size:12.5px; font-weight:600;">24%</span>
+          </div>
+          <div class="skill-bar-row">
+            <div class="skill-pill"><div class="skill-pill-fill" style="width:38%;"></div><span>NDA Agreement</span></div>
+            <span class="num" style="font-size:12.5px; font-weight:600;">18%</span>
+          </div>
+          <div class="skill-bar-row">
+            <div class="skill-pill"><div class="skill-pill-fill" style="width:24%;"></div><span>Loan &amp; General</span></div>
+            <span class="num" style="font-size:12.5px; font-weight:600;">16%</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Activity Log</div>
+              <div class="card-sub">Latest 4 audit events</div>
+            </div>
+            <button class="btn btn-outline" onclick="switchView('logs', 'Activity Log')">See All</button>
+          </div>
+          <div id="dashLogsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ALL ORDERS VIEW -->
+    <section class="view" id="view-orders">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">All Stamping Orders</div>
+            <div class="card-sub">Manage documents, flag incomplete uploads, upload certificates, or delete orders</div>
+          </div>
+          <button class="btn btn-blue" onclick="openSimulateModal()">+ Simulate Order</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Document</th>
+                <th>Amount</th>
+                <th>Account &amp; Payment Rule</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fullOrdersBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="fullOrdersPager"></div>
+      </div>
+    </section>
+
+    <!-- 3. INCOMPLETE PAYMENTS VIEW -->
+    <section class="view" id="view-unpaid">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Incomplete &amp; Failed Payments</div>
+            <div class="card-sub">1st-time unpaid orders auto-cancel; 2nd-time orders in an existing account remain open</div>
+          </div>
+          <button class="btn btn-blue" onclick="runAutoCancelRule()">Run Auto-Cancel</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Payment Attempt</th>
+                <th>Amount Due</th>
+                <th>Auto-Cancel Policy</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="unpaidBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="unpaidPager"></div>
+      </div>
+    </section>
+
+    <!-- 4. ACTIVE USERS VIEW -->
+    <section class="view" id="view-users">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Active Customer Accounts</div>
+            <div class="card-sub">Auto-created on 1st payment; repeat orders link to the same account</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email &amp; Phone</th>
+                <th>Account Origin</th>
+                <th>Total Orders</th>
+                <th>Password State</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="usersPager"></div>
+      </div>
+    </section>
+
+    <!-- 5. DUTY & DOC RATES VIEW -->
+    <section class="view" id="view-rates">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Stamp Duty &amp; Document Types</div>
+            <div class="card-sub">Configured LHDN stamp duty rates and processing fees</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>Base Stamp Duty</th>
+                <th>Processing Fee</th>
+                <th>Late Penalty</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ratesBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="ratesPager"></div>
+      </div>
+    </section>
+
+    <!-- 6. E-INVOICES & RECEIPTS VIEW -->
+    <section class="view" id="view-invoices">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">e-Invoices &amp; Payment Receipts</div>
+            <div class="card-sub">Auto-generated PDF e-Invoices and receipts synced to customer portal</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice / Receipt No</th>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Gateway</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="invoicesPager"></div>
+      </div>
+    </section>
+
+    <!-- 7. ACTIVITY LOG VIEW -->
+    <section class="view" id="view-logs">
+      <div class="card" id="fullLogsList"></div>
+    </section>
+
+    <!-- 8. SETTINGS & ROLES VIEW -->
+    <section class="view" id="view-settings">
+      <div class="card card-pad">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+          <div class="field">
+            <label>1st-Time Unpaid Auto-Cancel Timeout</label>
+            <input class="input" type="text" value="24 Hours (Auto-cancel enabled for 1st-time orders)" />
+          </div>
+          <div class="field">
+            <label>Repeat Customer Unpaid Policy</label>
+            <input class="input" type="text" value="Keep Open (2nd+ payment in same account does not auto-cancel)" disabled />
+          </div>
+          <div class="field">
+            <label>Admin Roles Configured</label>
+            <input class="input" type="text" value="Super Admin (Ruzaini), Processing Staff (Aina)" />
+          </div>
+          <div class="field">
+            <label>LHDN Submission Mode</label>
+            <input class="input" type="text" value="Manual LHDN Submission + Stamp Certificate Upload" disabled />
+          </div>
+        </div>
+        <button class="btn btn-blue" onclick="showToast('Admin settings saved.')">Save Settings</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Order Details Modal -->
+  <div class="modal-backdrop" id="orderModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <strong style="font-size:15px;">Order Details</strong>
+          <span id="modalOrderPill" class="badge blue">#895</span>
+        </div>
+        <button class="btn btn-outline" onclick="closeOrderModal()">Close</button>
+      </div>
+      <div class="modal-tabs" id="modalTabs">
+        <button class="mtab active" data-mtab="overview">Progress &amp; Details</button>
+        <button class="mtab" data-mtab="docs">Document &amp; Stamp</button>
+        <button class="mtab" data-mtab="note">Internal Note</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <!-- Simulate Order Modal -->
+  <div class="modal-backdrop" id="simModal">
+    <div class="modal" style="max-width:460px;">
+      <div class="modal-head">
+        <strong>Simulate Incoming Order</strong>
+        <button class="btn btn-outline" onclick="closeSimModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="simName">Customer Name</label>
+          <input class="input" id="simName" type="text" value="Aiman Hakim" />
+        </div>
+        <div class="field">
+          <label for="simEmail">Customer Email</label>
+          <input class="input" id="simEmail" type="email" value="aiman@example.my" />
+        </div>
+        <div class="field">
+          <label>Payment &amp; Account Scenario</label>
+          <div class="custom-select" id="simDropdown">
+            <button type="button" class="custom-select-trigger" id="simTrigger">
+              <span id="simLabel">1st-Time Paid (Auto-create Account)</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="custom-select-menu" id="simMenu">
+              <button type="button" class="custom-select-opt selected" data-value="first_paid">1st-Time Paid (Auto-create Account)</button>
+              <button type="button" class="custom-select-opt" data-value="first_unpaid">1st-Time Unpaid (Auto-Cancel Eligible)</button>
+              <button type="button" class="custom-select-opt" data-value="second_unpaid">2nd Payment Same Acc (Unpaid, Kept Open)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline" onclick="closeSimModal()">Cancel</button>
+        <button class="btn btn-blue" onclick="createSimulatedOrder()">Create Order</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ── Data Store ──
+    let orders = [
+      { id: 895, customer: 'naqibimannn', email: 'naqibimannn@gmail.com', docType: 'Tenancy Agreement', amount: 80.00, stampDuty: 60.00, processingFee: 20.00, paid: true, isFirstOrder: false, status: 'New', gateway: 'FPX', date: '24 Nov 2026', step: 3, note: '2nd order linked to existing account without overwriting password.' },
+      { id: 894, customer: 'Siti Nurhaliza', email: 'siti.nur@company.my', docType: 'Service Agreement', amount: 30.00, stampDuty: 10.00, processingFee: 20.00, paid: true, isFirstOrder: true, status: 'Sent to LHDN', gateway: 'DuitNow QR', date: '24 Nov 2026', step: 4, note: '1st-time payment verified. Account auto-created.' },
+      { id: 893, customer: 'naqibimannn', email: 'naqibimannn@gmail.com', docType: 'NDA Agreement', amount: 30.00, stampDuty: 10.00, processingFee: 20.00, paid: false, isFirstOrder: false, status: 'Awaiting Payment', gateway: 'FPX', date: '23 Nov 2026', step: 2, note: '2nd payment in same account — protected from auto-cancel.' },
+      { id: 892, customer: 'Farid Kamil', email: 'farid.k@gmail.com', docType: 'Loan Agreement', amount: 55.00, stampDuty: 35.00, processingFee: 20.00, paid: false, isFirstOrder: true, status: 'Auto-Cancelled', gateway: 'Card', date: '22 Nov 2026', step: 1, note: '1st-time order unpaid past 24h timeout — auto-cancelled.' },
+      { id: 891, customer: 'Amira Othman', email: 'amira@studio.my', docType: 'General Agreement', amount: 30.00, stampDuty: 10.00, processingFee: 20.00, paid: true, isFirstOrder: true, status: 'Completed', gateway: 'CHIP Collect', date: '21 Nov 2026', step: 6, adjNo: 'LHDN-2026-891004', note: 'Stamp certificate uploaded & synced.' }
+    ];
+
+    let activeUsers = [
+      { name: 'naqibimannn', email: 'naqibimannn@gmail.com', phone: '+60 11-1208 5054', origin: 'Auto-created (1st Payment)', ordersCount: 2, pwState: 'Active' },
+      { name: 'Siti Nurhaliza', email: 'siti.nur@company.my', phone: '+60 12-345 6789', origin: 'Auto-created (1st Payment)', ordersCount: 1, pwState: 'Temp Password Sent' },
+      { name: 'Amira Othman', email: 'amira@studio.my', phone: '+60 19-888 2211', origin: 'Auto-created (1st Payment)', ordersCount: 1, pwState: 'Active' },
+      { name: 'Distro Empire', email: 'thedistroempire@gmail.com', phone: '+60 11-8888 9960', origin: 'Existing Account', ordersCount: 3, pwState: 'Active' }
+    ];
+
+    const dutyRates = [
+      { type: 'Tenancy Agreement', duty: 'RM 10.00 – RM 60.00', fee: 'RM 20.00', penalty: 'RM 25.00 – RM 100.00' },
+      { type: 'Service Agreement', duty: 'RM 10.00', fee: 'RM 20.00', penalty: 'RM 25.00' },
+      { type: 'Loan Agreement', duty: '0.5% of Loan', fee: 'RM 20.00', penalty: 'RM 50.00' },
+      { type: 'NDA / Confidentiality', duty: 'RM 10.00', fee: 'RM 20.00', penalty: 'RM 25.00' },
+      { type: 'General Agreement', duty: 'RM 10.00', fee: 'RM 20.00', penalty: 'RM 25.00' }
+    ];
+
+    let activityLogs = [
+      { title: 'New Order #895 Received', desc: 'naqibimannn submitted Tenancy Agreement (2nd order linked to existing account).', time: '24 Nov 2026, 10:42 AM', tone: 'blue' },
+      { title: 'Account Auto-Created (1st Payment)', desc: 'Siti Nurhaliza paid RM 30.00 via DuitNow QR. Temp password & e-Invoice sent.', time: '24 Nov 2026, 09:18 AM', tone: 'green' },
+      { title: '2nd Payment Pending — Not Auto-Cancelled', desc: 'Order #893 (naqibimannn) awaiting payment; kept open as repeat account order.', time: '23 Nov 2026, 04:15 PM', tone: 'amber' },
+      { title: '1st-Time Order #892 Auto-Cancelled', desc: 'Farid Kamil did not complete 1st-time payment within 24 hours.', time: '23 Nov 2026, 02:00 PM', tone: 'red' },
+      { title: 'Certificate Uploaded for #891', desc: 'Admin uploaded LHDN Stamp Certificate (LHDN-2026-891004).', time: '21 Nov 2026, 03:30 PM', tone: 'green' }
+    ];
+
+    let dashStatusFilter = 'all';
+    let simScenario = 'first_paid';
+    let uploadTargetOrderId = null;
+    let currentModalOrderId = null;
+    let currentModalTab = 'overview';
+
+    const PAGE_SIZE = 4;
+    const pageState = { fullOrders: 1, unpaid: 1, users: 1, rates: 1, invoices: 1 };
+
+    function switchView(viewId, titleText) {
+      document.querySelectorAll('.side-link').forEach(b => b.classList.toggle('active', b.dataset.view === viewId));
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${viewId}`));
+      if (titleText) document.getElementById('topPageTitle').textContent = titleText;
+    }
+
+    document.querySelectorAll('.side-link').forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.view, btn.dataset.title));
+    });
+
+    function badgeClass(status) {
+      if (status === 'Completed') return 'green';
+      if (status === 'New' || status === 'Sent to LHDN') return 'blue';
+      if (status === 'Awaiting Payment') return 'amber';
+      if (status === 'Incomplete Document' || status === 'Auto-Cancelled') return 'red';
+      return 'grey';
+    }
+
+    function goToPage(key, page) { pageState[key] = page; renderAll(); }
+
+    function paginateAndRender(key, items, bodyId, pagerId, rowRenderer, emptyHtml) {
+      const total = items.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      if (pageState[key] > totalPages) pageState[key] = totalPages;
+      if (pageState[key] < 1) pageState[key] = 1;
+
+      const current = pageState[key];
+      const start = (current - 1) * PAGE_SIZE;
+      const slice = items.slice(start, start + PAGE_SIZE);
+
+      document.getElementById(bodyId).innerHTML = slice.length
+        ? slice.map((item, idx) => rowRenderer(item, start + idx)).join('')
+        : emptyHtml;
+
+      const end = Math.min(start + slice.length, total);
+      const infoText = total === 0 ? 'Showing 0 of 0' : `Showing ${start + 1}–${end} of ${total}`;
+
+      let btns = `<button class="page-btn" ${current === 1 ? 'disabled' : ''} onclick="goToPage('${key}', ${current - 1})">Prev</button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        btns += `<button class="page-btn num ${p === current ? 'active' : ''}" onclick="goToPage('${key}', ${p})">${p}</button>`;
+      }
+      btns += `<button class="page-btn" ${current === totalPages ? 'disabled' : ''} onclick="goToPage('${key}', ${current + 1})">Next</button>`;
+
+      document.getElementById(pagerId).innerHTML = `<span class="num">${infoText}</span><div class="page-btns">${btns}</div>`;
+    }
+
+    function renderAll() {
+      const paidOrders = orders.filter(o => o.paid);
+      const unpaidOrders = orders.filter(o => !o.paid);
+      const totalRev = paidOrders.reduce((s, o) => s + o.amount, 0);
+      const newCount = orders.filter(o => o.status === 'New' || o.status === 'Sent to LHDN').length;
+
+      document.getElementById('kpiRev').textContent = `RM ${totalRev.toFixed(2)}`;
+      document.getElementById('kpiUnpaid').textContent = unpaidOrders.length;
+      document.getElementById('kpiNew').textContent = newCount;
+      document.getElementById('kpiTotalOrders').textContent = orders.length;
+
+      document.getElementById('navOrderCount').textContent = orders.length;
+      document.getElementById('navUnpaidCount').textContent = unpaidOrders.length;
+      document.getElementById('navUserCount').textContent = activeUsers.length;
+      document.getElementById('navLogCount').textContent = activityLogs.length;
+      document.getElementById('notifCount').textContent = newCount;
+
+      renderOrderTables();
+      renderUnpaidTable();
+      renderUsers();
+      renderRates();
+      renderInvoices();
+      renderLogs();
+    }
+
+    function orderRowHtml(o) {
+      const ruleText = o.isFirstOrder
+        ? (o.paid ? '1st Paid · Auto Acc' : '1st Unpaid · Auto-Cancel')
+        : (o.paid ? 'Repeat · Linked' : '2nd Unpaid · Kept Open');
+
+      return `
+        <tr>
+          <td class="num nowrap"><strong>#${o.id}</strong><div class="rule-note">${o.date}</div></td>
+          <td><strong>${o.customer}</strong><div class="rule-note">${o.email}</div></td>
+          <td class="nowrap">${o.docType}</td>
+          <td class="num nowrap"><strong>RM ${o.amount.toFixed(2)}</strong><div class="rule-note">${o.paid ? 'Paid · ' + o.gateway : 'Unpaid'}</div></td>
+          <td class="nowrap"><span class="badge ${o.isFirstOrder && !o.paid ? 'red' : 'grey'}">${ruleText}</span></td>
+          <td class="nowrap"><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
+          <td class="nowrap">
+            <div class="action-cell">
+              <button class="btn btn-outline" onclick="openOrderModal(${o.id})">Manage</button>
+              <button class="btn btn-amber" onclick="markIncompleteDoc(${o.id})">Incomplete Doc</button>
+              <button class="btn btn-red" onclick="deleteOrder(${o.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function renderOrderTables() {
+      const dashFiltered = orders.filter(o => dashStatusFilter === 'all' || o.status === dashStatusFilter).slice(0, 4);
+      document.getElementById('dashOrdersBody').innerHTML = dashFiltered.length
+        ? dashFiltered.map(orderRowHtml).join('')
+        : '<tr><td colspan="7" style="text-align:center; color:var(--ink-2); padding:24px;">No matching orders.</td></tr>';
+
+      paginateAndRender('fullOrders', orders, 'fullOrdersBody', 'fullOrdersPager', orderRowHtml,
+        '<tr><td colspan="7" style="text-align:center; color:var(--ink-2); padding:24px;">No orders found.</td></tr>');
+    }
+
+    function renderUnpaidTable() {
+      const list = orders.filter(o => !o.paid);
+      paginateAndRender('unpaid', list, 'unpaidBody', 'unpaidPager', o => `
+        <tr>
+          <td class="num nowrap"><strong>#${o.id}</strong></td>
+          <td><strong>${o.customer}</strong><div class="rule-note">${o.email}</div></td>
+          <td class="nowrap">${o.isFirstOrder ? '1st-Time Order' : '2nd+ Order (Existing Acc)'}</td>
+          <td class="num nowrap"><strong>RM ${o.amount.toFixed(2)}</strong></td>
+          <td class="nowrap"><span class="badge ${o.isFirstOrder ? 'red' : 'green'}">${o.isFirstOrder ? 'Auto-Cancel on Timeout' : 'Protected (Kept Open)'}</span></td>
+          <td class="nowrap"><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
+          <td class="nowrap">
+            <div class="action-cell">
+              ${o.status !== 'Auto-Cancelled'
+                ? `<button class="btn btn-blue" onclick="sendPaymentLink(${o.id})">Send Payment Link</button>
+                   <button class="btn btn-green" onclick="markPaid(${o.id})">Mark Paid</button>`
+                : `<button class="btn btn-outline" onclick="restoreOrder(${o.id})">Restore</button>`}
+              <button class="btn btn-red" onclick="deleteOrder(${o.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `, '<tr><td colspan="7" style="text-align:center; color:var(--ink-2); padding:24px;">No incomplete payments.</td></tr>');
+    }
+
+    function renderUsers() {
+      document.getElementById('dashUsersList').innerHTML = activeUsers.slice(0, 3).map(u => `
+        <div class="mini-user-row">
+          <div style="display:flex; align-items:center; gap:9px; min-width:0;">
+            <div class="mini-avatar">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v2h20v-2c0-3.33-6.67-5-10-5z"/></svg>
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:12.5px; font-weight:600;">${u.name}</div>
+              <div style="font-size:11px; color:var(--ink-3);">${u.origin}</div>
+            </div>
+          </div>
+          <span class="badge blue num">${u.ordersCount} Orders</span>
+        </div>
+      `).join('');
+
+      paginateAndRender('users', activeUsers, 'usersBody', 'usersPager', (u, idx) => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}<div class="rule-note num">${u.phone}</div></td>
+          <td class="nowrap"><span class="badge blue">${u.origin}</span></td>
+          <td class="num nowrap"><strong>${u.ordersCount}</strong></td>
+          <td class="nowrap"><span class="badge ${u.pwState === 'Active' ? 'green' : 'amber'}">${u.pwState}</span></td>
+          <td class="nowrap"><button class="btn btn-outline" onclick="resetUserPw(${idx})">Reset Temp Password</button></td>
+        </tr>
+      `, '<tr><td colspan="6" style="text-align:center; color:var(--ink-2); padding:24px;">No active users.</td></tr>');
+    }
+
+    function renderRates() {
+      paginateAndRender('rates', dutyRates, 'ratesBody', 'ratesPager', r => `
+        <tr>
+          <td><strong>${r.type}</strong></td>
+          <td class="num nowrap">${r.duty}</td>
+          <td class="num nowrap">${r.fee}</td>
+          <td class="num nowrap">${r.penalty}</td>
+          <td class="nowrap"><span class="badge green">Active</span></td>
+        </tr>
+      `, '<tr><td colspan="5" style="text-align:center; color:var(--ink-2); padding:24px;">No rates configured.</td></tr>');
+    }
+
+    function renderInvoices() {
+      const paid = orders.filter(o => o.paid);
+      paginateAndRender('invoices', paid, 'invoicesBody', 'invoicesPager', o => `
+        <tr>
+          <td class="num nowrap"><strong>INV-2026-0${o.id}</strong><div class="rule-note">RCP-2026-0${o.id}</div></td>
+          <td class="num nowrap">#${o.id}</td>
+          <td>${o.customer}</td>
+          <td class="num nowrap"><strong>RM ${o.amount.toFixed(2)}</strong></td>
+          <td class="nowrap">${o.gateway}</td>
+          <td class="nowrap"><button class="btn btn-outline" onclick="showToast('Downloading e-Invoice PDF for #${o.id}...')">Download PDF</button></td>
+        </tr>
+      `, '<tr><td colspan="6" style="text-align:center; color:var(--ink-2); padding:24px;">No e-invoices yet.</td></tr>');
+    }
+
+    function renderLogs() {
+      const htmlFn = l => `
+        <div class="log-row ${l.tone}">
+          <div class="log-top">
+            <span class="log-title">${l.title}</span>
+            <span class="log-time num">${l.time}</span>
+          </div>
+          <div class="log-desc">${l.desc}</div>
+        </div>
+      `;
+      document.getElementById('dashLogsList').innerHTML = activityLogs.slice(0, 4).map(htmlFn).join('');
+      document.getElementById('fullLogsList').innerHTML = activityLogs.map(htmlFn).join('');
+    }
+
+    // ── Admin Actions ──
+    function addLog(title, desc, tone = 'blue') {
+      activityLogs.unshift({ title, desc, time: 'Just now', tone });
+      renderAll();
+    }
+
+    function markIncompleteDoc(id) {
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      o.status = 'Incomplete Document';
+      o.step = 2;
+      addLog(`Order #${id} Marked Incomplete Document`, `Admin flagged ${o.customer}'s uploaded file for correction.`, 'amber');
+      showToast(`Order #${id} marked as Incomplete Document.`);
+    }
+
+    function deleteOrder(id) {
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      orders = orders.filter(x => x.id !== id);
+      addLog(`Order #${id} Deleted`, `Admin removed order for ${o.customer} (${o.docType}).`, 'red');
+      showToast(`Order #${id} deleted.`);
+    }
+
+    function runAutoCancelRule() {
+      let count = 0;
+      orders.forEach(o => {
+        if (!o.paid && o.isFirstOrder && o.status !== 'Auto-Cancelled') {
+          o.status = 'Auto-Cancelled';
+          o.step = 1;
+          count++;
+          addLog(`Order #${o.id} Auto-Cancelled`, `1st-time order by ${o.customer} had no payment within timeout.`, 'red');
+        }
+      });
+      showToast(count ? `Auto-cancelled ${count} unpaid 1st-time order(s).` : 'Checked: 2nd-time unpaid orders in existing accounts are kept open.');
+    }
+
+    function markPaid(id) {
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      o.paid = true;
+      o.status = 'New';
+      o.step = 3;
+      if (o.isFirstOrder && !activeUsers.some(u => u.email === o.email)) {
+        activeUsers.unshift({
+          name: o.customer, email: o.email, phone: '+60 1x-xxx xxxx',
+          origin: 'Auto-created (1st Payment)', ordersCount: 1, pwState: 'Temp Password Sent'
+        });
+        addLog(`Payment Verified & Account Auto-Created (#${id})`, `${o.customer} paid RM ${o.amount.toFixed(2)}.`, 'green');
+      } else {
+        addLog(`Payment Verified for Order #${id}`, `${o.customer} completed RM ${o.amount.toFixed(2)} payment.`, 'green');
+      }
+      renderAll();
+      showToast(`Order #${id} marked as paid.`);
+    }
+
+    function sendPaymentLink(id) {
+      addLog(`Payment Link Resent (#${id})`, `Admin emailed retry payment link to customer.`, 'blue');
+      showToast(`Payment retry link sent for Order #${id}.`);
+    }
+
+    function restoreOrder(id) {
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      o.status = 'Awaiting Payment';
+      o.step = 2;
+      addLog(`Order #${id} Restored`, `Admin reopened order for payment.`, 'blue');
+      showToast(`Order #${id} restored.`);
+    }
+
+    function resetUserPw(idx) {
+      const u = activeUsers[idx];
+      if (!u) return;
+      u.pwState = 'Temp Password Sent';
+      addLog(`Password Reset for ${u.name}`, `Admin sent one-time temporary password to ${u.email}.`, 'amber');
+      showToast(`Temporary password sent to ${u.email}.`);
+    }
+
+    // ── Order Details Modal (6-step tracker + tabs) ──
+    function buildOrderTrackerHtml(o) {
+      const steps = [
+        { label: 'Order Placed', time: o.date },
+        { label: 'Payment', time: o.paid ? o.gateway : 'Pending' },
+        { label: 'Admin Review', time: o.step >= 3 ? 'In Progress' : 'Waiting' },
+        { label: 'Sent to LHDN', time: o.step >= 4 ? 'Submitted' : 'Manual' },
+        { label: 'Cert Uploaded', time: o.step >= 5 ? 'Synced' : 'Pending' },
+        { label: 'Completed', time: o.step >= 6 ? 'Done' : 'Pending' }
+      ];
+
+      return `
+        <div class="tracker-meta">
+          <span><strong>Order #${o.id}</strong> — ${o.customer} (${o.docType})</span>
+          <span class="num">Total: <strong>RM ${o.amount.toFixed(2)}</strong></span>
+          <span class="badge ${badgeClass(o.status)}">${o.status}</span>
+          <span class="num" style="color:var(--ink-2);">Date: ${o.date}</span>
+        </div>
+        <div class="steps-track">
+          ${steps.map((st, idx) => {
+            const num = idx + 1;
+            const cls = num < o.step ? 'done' : (num === o.step ? 'current' : '');
+            return `
+              <div class="step-node ${cls}">
+                <div class="step-num num">${num}</div>
+                <div class="step-label">${st.label}</div>
+                <div class="step-time">${st.time}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function openOrderModal(id) {
+      currentModalOrderId = id;
+      currentModalTab = 'overview';
+      renderOrderModalBody();
+      document.getElementById('orderModal').classList.add('open');
+    }
+
+    function renderOrderModalBody() {
+      const o = orders.find(x => x.id === currentModalOrderId);
+      if (!o) return;
+      document.getElementById('modalOrderPill').textContent = `#${o.id} · ${o.customer}`;
+      document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.mtab === currentModalTab));
+
+      const body = document.getElementById('modalBody');
+      if (currentModalTab === 'overview') {
+        body.innerHTML = `
+          ${buildOrderTrackerHtml(o)}
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:12.5px; padding:10px 12px; background:var(--subtle); border:1px solid var(--border); border-radius:var(--rad-sm);">
+            <span>Email: <strong>${o.email}</strong></span>
+            <span class="num">Duty: <strong>RM ${o.stampDuty.toFixed(2)}</strong> · Fee: <strong>RM ${o.processingFee.toFixed(2)}</strong></span>
+          </div>
+        `;
+      } else if (currentModalTab === 'docs') {
+        body.innerHTML = `
+          <div style="padding:14px; border:1px solid var(--border); border-radius:var(--rad-sm); display:flex; justify-content:space-between; align-items:center;">
+            <div><strong>Customer Document</strong><div class="rule-note">${o.docType} (PDF)</div></div>
+            <button class="btn btn-outline" onclick="showToast('Downloading customer document for #${o.id}...')">Download</button>
+          </div>
+          <div style="padding:14px; border:1px solid var(--border); border-radius:var(--rad-sm); display:flex; justify-content:space-between; align-items:center;">
+            <div><strong>LHDN Stamp Certificate</strong><div class="rule-note">${o.adjNo ? o.adjNo : 'Pending manual upload'}</div></div>
+            <button class="btn btn-green" onclick="triggerCertUpload(${o.id})">Upload Stamp Cert</button>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div class="field">
+            <label for="adminNoteInput">Internal Admin Note</label>
+            <input class="input" id="adminNoteInput" type="text" value="${o.note || ''}" />
+          </div>
+        `;
+      }
+
+      document.getElementById('modalFoot').innerHTML = `
+        <button class="btn btn-amber" onclick="markIncompleteDoc(${o.id}); closeOrderModal();">Incomplete Doc</button>
+        <button class="btn btn-outline" onclick="sendToLhdn(${o.id})">Send to LHDN</button>
+        <button class="btn btn-green" onclick="triggerCertUpload(${o.id})">Upload Stamp Cert</button>
+        <button class="btn btn-blue" onclick="saveOrderNote(${o.id})">Save</button>
+      `;
+    }
+
+    document.querySelectorAll('.mtab').forEach(tab => {
+      tab.addEventListener('click', () => { currentModalTab = tab.dataset.mtab; renderOrderModalBody(); });
+    });
+
+    function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
+
+    function saveOrderNote(id) {
+      const o = orders.find(x => x.id === id);
+      const noteEl = document.getElementById('adminNoteInput');
+      if (o && noteEl) {
+        o.note = noteEl.value;
+        addLog(`Note Updated (#${id})`, `Admin updated internal note on Order #${id}.`, 'blue');
+      }
+      closeOrderModal();
+      showToast(`Order #${id} saved.`);
+    }
+
+    function sendToLhdn(id) {
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      o.status = 'Sent to LHDN';
+      o.step = 4;
+      addLog(`Order #${id} Sent to LHDN`, `Processing staff submitted documents manually to LHDN.`, 'blue');
+      closeOrderModal();
+      showToast(`Order #${id} updated to Sent to LHDN.`);
+    }
+
+    function triggerCertUpload(id) { uploadTargetOrderId = id; document.getElementById('certUploadInput').click(); }
+
+    document.getElementById('certUploadInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file || !uploadTargetOrderId) return;
+      const o = orders.find(x => x.id === uploadTargetOrderId);
+      if (o) {
+        o.status = 'Completed';
+        o.step = 6;
+        o.adjNo = `LHDN-2026-${o.id}099`;
+        addLog(`Stamp Cert Uploaded (#${o.id})`, `Uploaded "${file.name}". Synced to customer portal.`, 'green');
+        closeOrderModal();
+        showToast(`Certificate uploaded for #${o.id}.`);
+      }
+      e.target.value = '';
+      uploadTargetOrderId = null;
+    });
+
+    // ── Simulate Modal ──
+    function openSimulateModal() { document.getElementById('simModal').classList.add('open'); }
+    function closeSimModal() { document.getElementById('simModal').classList.remove('open'); }
+
+    function createSimulatedOrder() {
+      const name = document.getElementById('simName').value.trim() || 'New Customer';
+      const email = document.getElementById('simEmail').value.trim() || 'customer@example.my';
+      const nextId = Math.max(...orders.map(o => o.id)) + 1;
+
+      if (simScenario === 'first_paid') {
+        orders.unshift({ id: nextId, customer: name, email, docType: 'Tenancy Agreement', amount: 30.00, stampDuty: 10.00, processingFee: 20.00, paid: true, isFirstOrder: true, status: 'New', gateway: 'FPX', date: 'Just now', step: 3, note: '1st-time payment verified — account auto-created.' });
+        activeUsers.unshift({ name, email, phone: '+60 1x-xxx xxxx', origin: 'Auto-created (1st Payment)', ordersCount: 1, pwState: 'Temp Password Sent' });
+        addLog(`Order #${nextId} Paid & Account Auto-Created`, `${name} paid RM 30.00.`, 'green');
+      } else if (simScenario === 'first_unpaid') {
+        orders.unshift({ id: nextId, customer: name, email, docType: 'Service Agreement', amount: 30.00, stampDuty: 10.00, processingFee: 20.00, paid: false, isFirstOrder: true, status: 'Awaiting Payment', gateway: 'FPX', date: 'Just now', step: 2, note: '1st-time unpaid order — eligible for auto-cancel.' });
+        addLog(`1st-Time Unpaid Order #${nextId}`, `${name} has not paid.`, 'amber');
+      } else {
+        orders.unshift({ id: nextId, customer: 'naqibimannn', email: 'naqibimannn@gmail.com', docType: 'General Agreement', amount: 30.00, stampDuty: 10.00, processingFee: 20.00, paid: false, isFirstOrder: false, status: 'Awaiting Payment', gateway: 'FPX', date: 'Just now', step: 2, note: '2nd payment on existing account — does NOT auto-cancel.' });
+        addLog(`2nd Payment Unpaid (#${nextId})`, `naqibimannn order awaiting payment; kept open.`, 'blue');
+      }
+      closeSimModal();
+      renderAll();
+      showToast(`Simulated Order #${nextId} added.`);
+    }
+
+    // ── Custom Dropdowns ──
+    function setupDropdown(dropId, triggerId, labelId, menuId, onSelect) {
+      const drop = document.getElementById(dropId);
+      const trig = document.getElementById(triggerId);
+      const lbl = document.getElementById(labelId);
+      const menu = document.getElementById(menuId);
+      trig.addEventListener('click', e => { e.stopPropagation(); drop.classList.toggle('open'); });
+      menu.querySelectorAll('.custom-select-opt').forEach(opt => {
+        opt.addEventListener('click', () => {
+          lbl.textContent = opt.textContent;
+          menu.querySelectorAll('.custom-select-opt').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          drop.classList.remove('open');
+          onSelect(opt.dataset.value);
+        });
+      });
+      document.addEventListener('click', e => { if (!drop.contains(e.target)) drop.classList.remove('open'); });
+    }
+
+    setupDropdown('dashStatusDropdown', 'dashStatusTrigger', 'dashStatusLabel', 'dashStatusMenu', val => { dashStatusFilter = val; renderOrderTables(); });
+    setupDropdown('simDropdown', 'simTrigger', 'simLabel', 'simMenu', val => { simScenario = val; });
+
+    // ── Global Search Dropdown (⌘K + affects everything) ──
+    const searchDropdown = document.getElementById('globalSearchDropdown');
+    const searchWrap = document.getElementById('globalSearchWrap');
+    const searchInput = document.getElementById('globalSearch');
+
+    function closeSearchDropdown() { searchDropdown.classList.remove('open'); }
+    function selectSearchOrder(id) { closeSearchDropdown(); openOrderModal(id); }
+    function selectSearchView(v, t) { closeSearchDropdown(); switchView(v, t); }
+
+    function renderSearchDropdown(q) {
+      if (!q) { closeSearchDropdown(); return; }
+      const lq = q.toLowerCase();
+
+      const mOrders = orders.filter(o => `#${o.id}`.includes(lq) || String(o.id).includes(lq) || o.customer.toLowerCase().includes(lq) || o.email.toLowerCase().includes(lq) || o.docType.toLowerCase().includes(lq) || o.status.toLowerCase().includes(lq));
+      const mUsers = activeUsers.filter(u => u.name.toLowerCase().includes(lq) || u.email.toLowerCase().includes(lq) || u.origin.toLowerCase().includes(lq));
+      const mRates = dutyRates.filter(r => r.type.toLowerCase().includes(lq) || r.duty.toLowerCase().includes(lq));
+      const mInvoices = orders.filter(o => o.paid && (`inv-2026-0${o.id}`.includes(lq) || `rcp-2026-0${o.id}`.includes(lq) || o.customer.toLowerCase().includes(lq)));
+      const mLogs = activityLogs.filter(l => l.title.toLowerCase().includes(lq) || l.desc.toLowerCase().includes(lq));
+
+      let html = '';
+      if (mOrders.length) {
+        html += `<div class="search-group-title">Orders (${mOrders.length})</div>`;
+        html += mOrders.slice(0, 4).map(o => `<button type="button" class="search-result-item" onclick="selectSearchOrder(${o.id})"><div><strong>#${o.id} — ${o.customer}</strong><div class="rule-note">${o.docType} · RM ${o.amount.toFixed(2)}</div></div><span class="badge ${badgeClass(o.status)}">${o.status}</span></button>`).join('');
+      }
+      if (mUsers.length) {
+        html += `<div class="search-group-title">Active Users (${mUsers.length})</div>`;
+        html += mUsers.slice(0, 4).map(u => `<button type="button" class="search-result-item" onclick="selectSearchView('users', 'Active Users')"><div><strong>${u.name}</strong><div class="rule-note">${u.email}</div></div><span class="badge green">${u.pwState}</span></button>`).join('');
+      }
+      if (mInvoices.length) {
+        html += `<div class="search-group-title">e-Invoices &amp; Receipts (${mInvoices.length})</div>`;
+        html += mInvoices.slice(0, 3).map(o => `<button type="button" class="search-result-item" onclick="selectSearchView('invoices', 'e-Invoices & Receipts')"><div><strong class="num">INV-2026-0${o.id}</strong><div class="rule-note">${o.customer} · RM ${o.amount.toFixed(2)}</div></div><span class="badge blue">PDF</span></button>`).join('');
+      }
+      if (mRates.length) {
+        html += `<div class="search-group-title">Duty &amp; Doc Rates (${mRates.length})</div>`;
+        html += mRates.slice(0, 3).map(r => `<button type="button" class="search-result-item" onclick="selectSearchView('rates', 'Duty & Doc Rates')"><div><strong>${r.type}</strong><div class="rule-note num">${r.duty}</div></div><span class="badge green">Rate</span></button>`).join('');
+      }
+      if (mLogs.length) {
+        html += `<div class="search-group-title">Activity Log (${mLogs.length})</div>`;
+        html += mLogs.slice(0, 3).map(l => `<button type="button" class="search-result-item" onclick="selectSearchView('logs', 'Activity Log')"><div><strong>${l.title}</strong><div class="rule-note">${l.desc}</div></div><span class="badge grey num">${l.time}</span></button>`).join('');
+      }
+      if (!html) html = `<div style="padding:18px; text-align:center; color:var(--ink-2);">No results found for "<strong>${q}</strong>"</div>`;
+
+      searchDropdown.innerHTML = html;
+      searchDropdown.classList.add('open');
+    }
+
+    searchInput.addEventListener('input', () => renderSearchDropdown(searchInput.value.trim()));
+    searchInput.addEventListener('focus', () => { if (searchInput.value.trim()) renderSearchDropdown(searchInput.value.trim()); });
+    document.addEventListener('click', e => { if (!searchWrap.contains(e.target)) closeSearchDropdown(); });
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); searchInput.focus(); }
+      if (e.key === 'Escape') closeSearchDropdown();
+    });
+
+    let toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
